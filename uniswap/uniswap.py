@@ -49,13 +49,13 @@ class Uniswap:
         self,
         address: Union[AddressLike, str, None],
         private_key: Optional[str],
+        base_token_addr: Optional[str],
         provider: str = None,
         web3: Web3 = None,
         version: int = 1,
         default_slippage: float = 0.01,
         factory_contract_addr: str = None,
         router_contract_addr: str = None,
-        base_token_addr: Optional[str],
     ) -> None:
         """
         :param address: The public address of the ETH wallet to use.
