@@ -8,7 +8,7 @@ from web3 import Web3
 from .uniswap import Uniswap, AddressLike, _str_to_addr
 from .token import BaseToken
 from .tokens import tokens
-from .constants import BASE_TOKEN
+from .constants import ETH_ADDRESS
 
 
 logger = logging.getLogger(__name__)
@@ -69,7 +69,7 @@ def price(
     """Returns the price of ``quantity`` tokens of ``token_in`` quoted in ``token_out``."""
     uni: Uniswap = ctx.obj["UNISWAP"]
     if quantity is None:
-        if token_in == BASE_TOKEN:
+        if token_in == ETH_ADDRESS:
             decimals = 18
         else:
             decimals = uni.get_token(token_in).decimals
@@ -78,7 +78,7 @@ def price(
     if raw:
         print(price)
     else:
-        if token_in == BASE_TOKEN:
+        if token_in == ETH_ADDRESS:
             decimals = 18
         else:
             decimals = uni.get_token(token_out).decimals
