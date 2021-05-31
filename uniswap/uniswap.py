@@ -508,7 +508,7 @@ class Uniswap:
                 (1 - slippage) * self._get_token_eth_input_price(input_token, qty, fee)
             )
             return self._build_and_send_tx(
-                self.router.functions.swapExactTokensForETH(
+                self.router.functions.swapExactTokensForETHSupportingFeeOnTransferTokens(
                     qty,
                     amount_out_min,
                     [input_token, self.get_weth_address()],
