@@ -55,6 +55,7 @@ class Uniswap:
         default_slippage: float = 0.01,
         factory_contract_addr: str = None,
         router_contract_addr: str = None,
+        base_token_addr: Optional[str],
     ) -> None:
         """
         :param address: The public address of the ETH wallet to use.
@@ -78,6 +79,10 @@ class Uniswap:
 
         # TODO: Write tests for slippage
         self.default_slippage = default_slippage
+
+        self.BASE_TOKEN = (
+            base_token_addr or ETH_ADDRESS
+        )
 
         if web3:
             self.w3 = web3
@@ -166,9 +171,9 @@ class Uniswap:
             if self.version == 3:
                 logger.warning("No fee set, assuming 0.3%")
 
-        if token0 == ETH_ADDRESS:
+        if token0 == BASE_TOKEN:
             return self._get_eth_token_input_price(token1, Wei(qty), fee)
-        elif token1 == ETH_ADDRESS:
+        elif token1 == BASE_TOKEN:
             return self._get_token_eth_input_price(token0, qty, fee)
         else:
             return self._get_token_token_input_price(token0, token1, qty, fee, route)
@@ -187,9 +192,9 @@ class Uniswap:
             if self.version == 3:
                 logger.warning("No fee set, assuming 0.3%")
 
-        if is_same_address(token0, ETH_ADDRESS):
+        if is_same_address(token0, BASE_TOKEN):
             return self._get_eth_token_output_price(token1, qty, fee)
-        elif is_same_address(token1, ETH_ADDRESS):
+        elif is_same_address(token1, BASE_TOKEN):
             return self._get_token_eth_output_price(token0, Wei(qty), fee)
         else:
             return self._get_token_token_output_price(token0, token1, qty, fee, route)
@@ -373,7 +378,7 @@ class Uniswap:
         if slippage is None:
             slippage = self.default_slippage
 
-        if input_token == ETH_ADDRESS:
+        if input_token == BASE_TOKEN:
             return self._eth_to_token_swap_input(
                 output_token, Wei(qty), recipient, fee, slippage
             )
@@ -381,7 +386,7 @@ class Uniswap:
             balance = self.get_token_balance(input_token)
             if balance < qty:
                 raise InsufficientBalance(balance, qty)
-            if output_token == ETH_ADDRESS:
+            if output_token == BASE_TOKEN:
                 return self._token_to_eth_swap_input(
                     input_token, qty, recipient, fee, slippage
                 )
@@ -409,7 +414,7 @@ class Uniswap:
         if slippage is None:
             slippage = self.default_slippage
 
-        if input_token == ETH_ADDRESS:
+        if input_token == BASE_TOKEN:
             balance = self.get_eth_balance()
             need = self._get_eth_token_output_price(output_token, qty)
             if balance < need:
@@ -417,7 +422,7 @@ class Uniswap:
             return self._eth_to_token_swap_output(
                 output_token, qty, recipient, fee, slippage
             )
-        elif output_token == ETH_ADDRESS:
+        elif output_token == BASE_TOKEN:
             qty = Wei(qty)
             return self._token_to_eth_swap_output(
                 input_token, qty, recipient, fee, slippage
@@ -779,7 +784,7 @@ class Uniswap:
     def get_token_balance(self, token: AddressLike) -> int:
         """Get the balance of a token for your address."""
         _validate_address(token)
-        if _addr_to_str(token) == ETH_ADDRESS:
+        if _addr_to_str(token) == BASE_TOKEN:
             return self.get_eth_balance()
         erc20 = _load_contract_erc20(self.w3, token)
         balance: int = erc20.functions.balanceOf(self.address).call()
@@ -1070,7 +1075,7 @@ class Uniswap:
         tokens = []
         for i in range(tokenCount):
             address = self.factory_contract.functions.getTokenWithId(i).call()
-            if address == "0x0000000000000000000000000000000000000000":
+            if address == BASE_TOKEN:
                 # Token is ETH
                 continue
             token = self.get_token(address)

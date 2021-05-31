@@ -1,7 +1,7 @@
 import functools
 from typing import Callable, Any, List, Dict, TYPE_CHECKING
 
-from .constants import ETH_ADDRESS
+from .constants import BASE_TOKEN
 
 if TYPE_CHECKING:
     from .uniswap import Uniswap
@@ -14,12 +14,12 @@ def check_approval(method: Callable) -> Callable:
     @functools.wraps(method)
     def approved(self: Any, *args: Any, **kwargs: Any) -> Any:
         # Check to see if the first token is actually ETH
-        token = args[0] if args[0] != ETH_ADDRESS else None
+        token = args[0] if args[0] != BASE_TOKEN else None
         token_two = None
 
         # Check second token, if needed
         if method.__name__ == "make_trade" or method.__name__ == "make_trade_output":
-            token_two = args[1] if args[1] != ETH_ADDRESS else None
+            token_two = args[1] if args[1] != BASE_TOKEN else None
 
         # Approve both tokens, if needed
         if token:

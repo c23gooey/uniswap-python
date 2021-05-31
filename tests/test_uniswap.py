@@ -11,7 +11,7 @@ from time import sleep
 from web3 import Web3
 
 from uniswap import Uniswap
-from uniswap.constants import ETH_ADDRESS
+from uniswap.constants import BASE_TOKEN
 from uniswap.exceptions import InvalidToken, InsufficientBalance
 from uniswap.util import _str_to_addr
 
@@ -48,7 +48,7 @@ def test_assets(client: Uniswap):
 
     for token_name, amount in [("DAI", 100 * 10 ** 18), ("USDC", 100 * 10 ** 6)]:
         token_addr = tokens[token_name]
-        price = client.get_price_output(_str_to_addr(ETH_ADDRESS), token_addr, amount)
+        price = client.get_price_output(_str_to_addr(BASE_TOKEN), token_addr, amount)
         logger.info(f"Cost of {amount} {token_name}: {price}")
         logger.info("Buying...")
 
@@ -105,7 +105,7 @@ class TestUniswap(object):
 
     # TODO: Detect mainnet vs rinkeby and set accordingly, like _get_token_addresses in the Uniswap class
     # For Mainnet testing (with `ganache-cli --fork` as per the ganache fixture)
-    eth = "0x0000000000000000000000000000000000000000"
+    eth = Web3.toChecksumAddress(BASE_TOKEN)
     weth = Web3.toChecksumAddress("0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2")
     bat = Web3.toChecksumAddress("0x0D8775F648430679A709E98d2b0Cb6250d2887EF")
     dai = Web3.toChecksumAddress("0x6b175474e89094c44da98b954eedeac495271d0f")
@@ -147,7 +147,7 @@ class TestUniswap(object):
         ],
     )
     def test_get_price_input(self, client, token0, token1, qty, kwargs):
-        if client.version == 1 and ETH_ADDRESS not in [token0, token1]:
+        if client.version == 1 and BASE_TOKEN not in [token0, token1]:
             pytest.skip("Not supported in this version of Uniswap")
         r = client.get_price_input(token0, token1, qty, **kwargs)
         assert r
@@ -169,7 +169,7 @@ class TestUniswap(object):
         ],
     )
     def test_get_price_output(self, client, token0, token1, qty, kwargs):
-        if client.version == 1 and ETH_ADDRESS not in [token0, token1]:
+        if client.version == 1 and BASE_TOKEN not in [token0, token1]:
             pytest.skip("Not supported in this version of Uniswap")
         r = client.get_price_output(token0, token1, qty, **kwargs)
         assert r
@@ -259,7 +259,7 @@ class TestUniswap(object):
         recipient,
         expectation,
     ):
-        if client.version == 1 and ETH_ADDRESS not in [input_token, output_token]:
+        if client.version == 1 and BASE_TOKEN not in [input_token, output_token]:
             pytest.skip(
                 "Not supported in this version of Uniswap, or at least no liquidity"
             )
@@ -309,7 +309,7 @@ class TestUniswap(object):
         recipient,
         expectation,
     ):
-        if client.version == 1 and ETH_ADDRESS not in [input_token, output_token]:
+        if client.version == 1 and BASE_TOKEN not in [input_token, output_token]:
             pytest.skip(
                 "Not supported in this version of Uniswap, or at least no liquidity"
             )
